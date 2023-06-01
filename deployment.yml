@@ -16,6 +16,7 @@ spec:
     containers:
      - name: code-editor
        image: creatorshubham/code-editor:latest
+       imagePullPolicy: Never
 
 ---
 
