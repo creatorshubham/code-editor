@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment01
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+    app: run-pods
+
+  template: 
+   metadata:
+     labels:
+      app: run-pods
+   spec:
+    containers:
+     - name: code-editor
+       image: creatorshubham/code-editor:latest
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-service
+  labels:
+   svc: new-svc
+spec:
+  selector:
+    app: run-pods
+  ports: 
+    - port: 3000
+      targetPort: 3000
+      nodePort: 31000
+  type: NodePort
