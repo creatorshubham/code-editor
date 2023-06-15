@@ -6,8 +6,6 @@
 trigger:
 - main
 
-pool:
-  name: knoldus-Vostro-3500
 
 steps:
 - task: NodeTool@0
