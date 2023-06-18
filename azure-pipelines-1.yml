@@ -1,0 +1,33 @@
+trigger:
+  branches:
+    include:
+    - refs/heads/main
+name: $(date:yyyyMMdd)$(rev:.r)
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: refs/heads/main
+jobs:
+- job: Job_1
+  displayName: Agent job 1
+  pool:
+    name: Default
+  steps:
+  - checkout: self
+    clean: true
+    fetchTags: false
+  - task: Docker@0
+    displayName: Build Docker Image
+    inputs:
+      containerregistrytype: Container Registry
+      action: Run a Docker command
+      customCommand: build -t creatorshubham/az-pipe:latest .
+  - task: Docker@0
+    displayName: Push an image
+    inputs:
+      containerregistrytype: Container Registry
+      dockerRegistryEndpoint: 516b565c-dbea-4905-b97b-e6bf9f4668a4
+      action: Push an image
+      imageName: creatorshubham/az-pipe:latest
+...
