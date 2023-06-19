@@ -30,4 +30,19 @@ jobs:
       dockerRegistryEndpoint: 516b565c-dbea-4905-b97b-e6bf9f4668a4
       action: Push an image
       imageName: creatorshubham/az-pipe:latest
+      
+- job: Job2
+  #- deployment: DeployWeb
+  displayName: deploy Web App
+  pool:
+    vmImage: 'Ubuntu-latest'
+    # creates an environment if it doesn't exist
+    environment: 'new-vm'
+    resourceName: new-vm
+    resourceType: virtualMachine
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: docker start -dp 3000:3000 creatorshubham/az-pipe:latest
 ...
