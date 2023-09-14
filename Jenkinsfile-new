@@ -10,12 +10,12 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/creatorshubham/code-editor.git'
-
-            }
-        }
+#        stage('Checkout Code') {
+#            steps {
+#                git 'https://github.com/creatorshubham/code-editor.git'
+#
+#            }
+#        }
 
         stage('Build and Push Docker Image') {
             steps {
