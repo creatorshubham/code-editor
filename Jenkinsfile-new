@@ -5,8 +5,8 @@ pipeline {
     }
 
     environment {
-        KUBECONFIG = credentials('KUBECONFIG')
-        DOCKERHUB_CREDENTIALS = credentials('DOCKERHUB_CREDENTIALS')
+        KUBECONFIG = credentials('kube-config')
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-pass')
     }
 
     stages {
