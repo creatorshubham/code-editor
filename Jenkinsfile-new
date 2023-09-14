@@ -1,0 +1,79 @@
+pipeline {
+    agent any
+    parameters {
+        choice(name: 'DEPLOY_ENV', choices: ['blue', 'green'], description: 'Select deployment environment')
+    }
+
+    environment {
+        KUBECONFIG = credentials('KUBECONFIG')
+        DOCKERHUB_CREDENTIALS = credentials('DOCKERHUB_CREDENTIALS')
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/creatorshubham/code-editor.git'
+
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    def dockerImageTag
+                    def dockerImageName = "your-dockerhub-username/your-app-name"
+
+                    if (params.DEPLOY_ENV == 'blue') {
+                        dockerImageTag = "blue-${env.BUILD_NUMBER}"
+                    } else {
+                        dockerImageTag = "green-${env.BUILD_NUMBER}"
+                    }
+
+                    // Build and push Docker image
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'docker build -t ${dockerImageName}:${dockerImageTag} .'
+                    sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
+                    sh 'docker push myapp:${env.BUILD_ID}'
+                }
+            }
+        }
+    }
+        stage('Deploy to Kubernetes') {
+            when {
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+            }
+            steps {
+                script {
+                    def kubectlCmd = "kubectl --kubeconfig=${KUBECONFIG} apply -f k8s/${params.DEPLOY_ENV}-deployment.yaml"
+
+                    // Apply the Kubernetes deployment file for the selected environment (blue/green)
+                    sh "${kubectlCmd}"
+                }
+            }
+        }
+
+        stage('Swap Environments') {
+            when {
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+            }
+            steps {
+                script {
+                    if (params.DEPLOY_ENV == 'blue') {
+                        sh "kubectl --kubeconfig=${KUBECONFIG} set image deployment/your-app-name your-app-name=${dockerImageName}:green-${env.BUILD_NUMBER}"
+                    } else {
+                        sh "kubectl --kubeconfig=${KUBECONFIG} set image deployment/your-app-name your-app-name=${dockerImageName}:blue-${env.BUILD_NUMBER}"
+                    }
+                }
+            }
+        }
+    }
+
+    // post {
+    //     failure {
+    //         // Handle deployment failure here (e.g., rollback)
+    //     }
+    //     success {
+    //         // Perform any post-deployment tasks (e.g., cleanup)
+    //     }
+    // }
+}
