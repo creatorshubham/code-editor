@@ -32,13 +32,16 @@ pipeline {
             }
         }
     }
-        stage('Push to Docker Hub')
+        stage('Push to Docker Hub'){
             steps{
                 withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'pass')]) {
                 script{
                     sh 'docker login -u creatorshubham -p ${pass}'
                     sh 'docker push creatorshubham/code-editor:v.${BUILD_NUMBER}'
             }
+}
+}
+}
         stage('Deploy to Kubernetes') {
             when {
                 expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
